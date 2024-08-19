@@ -2,43 +2,54 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
+	"main/analyzer"
 	"net/http"
 )
 
-type NameRequest struct {
-	Name string `json:"name"`
+// Middleware para manejar CORS
+func corsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
 }
 
-type GreetingResponse struct {
-	Message string `json:"message"`
-}
-
+// Función para manejar la ruta /greet
 func greetHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-
-	if r.Method == "OPTIONS" {
-		w.WriteHeader(http.StatusOK)
+	if r.Method != http.MethodPost {
+		http.Error(w, "Método no permitido", http.StatusMethodNotAllowed)
 		return
 	}
 
-	var req NameRequest
-	err := json.NewDecoder(r.Body).Decode(&req)
+	var requestBody map[string]string
+	err := json.NewDecoder(r.Body).Decode(&requestBody)
 	if err != nil {
-		http.Error(w, "Invalid request", http.StatusBadRequest)
+		http.Error(w, "Solicitud no válida", http.StatusBadRequest)
 		return
 	}
 
-	greeting := fmt.Sprintf("Hola: %s", req.Name)
-	resp := GreetingResponse{Message: greeting}
+	// Analiza el comando o comentario proporcionado
+	result, err := analyzer.Analyzer(requestBody["name"])
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
+	// Responde con el resultado del análisis
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(resp)
+	json.NewEncoder(w).Encode(map[string]interface{}{"messages": result})
 }
 
 func main() {
-	http.HandleFunc("/greet", greetHandler)
-	fmt.Println("Server running on http://localhost:8080")
-	http.ListenAndServe(":8080", nil)
+	mux := http.NewServeMux()
+	mux.HandleFunc("/greet", greetHandler)
+	http.ListenAndServe(":8080", corsMiddleware(mux))
 }

@@ -3,7 +3,7 @@ import './App.css';
 
 function App() {
   const [name, setName] = useState('');
-  const [fileContent, setFileContent] = useState('');
+  const [response, setResponse] = useState('');
 
   const handleNameChange = (event) => {
     setName(event.target.value);
@@ -20,8 +20,22 @@ function App() {
     }
   };
 
-  const handleSubmit = () => {
-    setFileContent(name);
+  const handleSubmit = async () => {
+    try {
+      const response = await fetch('http://localhost:8080/greet', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name: name }),
+      });
+
+      const data = await response.json();
+      // Unir los mensajes en una sola cadena para mostrar
+      setResponse(data.messages.join('\n'));
+    } catch (error) {
+      console.error('Error:', error);
+    }
   };
 
   return (
@@ -30,15 +44,12 @@ function App() {
       <textarea
         value={name}
         onChange={handleNameChange}
-        placeholder="Escribe tu nombre o carga un archivo"
+        placeholder="Escribe o carga un archivo"
       />
-      <input 
-        type="file" 
-        onChange={handleFileChange} 
-      />
+      <input type="file" onChange={handleFileChange} />
       <button onClick={handleSubmit}>Ejecutar</button>
       <textarea
-        value={`La información es: ${fileContent}`}
+        value={response}
         readOnly
         placeholder="Aquí se mostrará la información"
       />
