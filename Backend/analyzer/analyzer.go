@@ -3,6 +3,7 @@ package analyzer
 import (
 	"errors"
 	"fmt"
+	"main/commands" // Asegúrate de importar el paquete commands
 	"strings"
 )
 
@@ -28,7 +29,12 @@ func Analyzer(input string) (interface{}, error) {
 
 			switch tokens[0] {
 			case "mkdisk":
-				results = append(results, "Ejecutando comando mkdisk")
+				result, err := commands.ParserMkdisk(tokens[1:])
+				if err != nil {
+					results = append(results, fmt.Sprintf("Error en el comando mkdisk: %s", err))
+				} else {
+					results = append(results, result)
+				}
 			default:
 				results = append(results, fmt.Sprintf("Comando desconocido: %s", tokens[0]))
 			}

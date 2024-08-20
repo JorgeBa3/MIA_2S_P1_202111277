@@ -106,15 +106,21 @@ func ParserMkdisk(tokens []string) (string, error) {
 		cmd.fit = "FF"
 	}
 
+	// Convertir el tamaño a bytes
+	sizeBytes, err := utils.ConvertToBytes(cmd.size, cmd.unit)
+	if err != nil {
+		return "", fmt.Errorf("Error al convertir tamaño a bytes: %v", err)
+	}
+
 	// Crear el disco con los parámetros proporcionados
-	err := commandMkdisk(cmd)
+	err = commandMkdisk(cmd)
 	if err != nil {
 		return "", fmt.Errorf("Error al crear el disco: %v", err)
 	}
 
 	// Construye un mensaje detallado con las especificaciones del comando ejecutado
-	result := fmt.Sprintf("Comando mkdisk ejecutado con éxito.\nDetalles:\n- Tamaño: %d%s\n- Ajuste: %s\n- Ruta: %s",
-		cmd.size, cmd.unit, cmd.fit, cmd.path)
+	result := fmt.Sprintf("Comando mkdisk ejecutado con éxito.\nDetalles:\n- Tamaño: %d bytes\n- Ajuste: %s\n- Ruta: %s",
+		sizeBytes, cmd.fit, cmd.path)
 
 	return result, nil // Devuelve el mensaje detallado
 }

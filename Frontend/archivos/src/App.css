@@ -6,7 +6,14 @@ body {
   align-items: center;
   height: 100vh;
   margin: 0;
-  background-color: #00274d; /* Azul marino */
+  background-image: url(images.jpeg);
+  background-size: cover; /* Asegura que la imagen cubra todo el fondo */
+    background-position: center; /* Centra la imagen */
+    background-repeat: no-repeat; /* Evita que la imagen se repita */
+    height: 100vh; /* Ocupa toda la altura del viewport */
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 /* Estilo para el contenedor principal */
