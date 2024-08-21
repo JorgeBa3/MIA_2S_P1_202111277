@@ -35,9 +35,17 @@ func Analyzer(input string) (interface{}, error) {
 				} else {
 					results = append(results, result)
 				}
+			case "rmdisk":
+				result, err := commands.ParserRmdisk(tokens[1:])
+				if err != nil {
+					results = append(results, fmt.Sprintf("Error en el comando rmdisk: %s", err))
+				} else {
+					results = append(results, result)
+				}
 			default:
 				results = append(results, fmt.Sprintf("Comando desconocido: %s", tokens[0]))
 			}
+
 		}
 	}
 

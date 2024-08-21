@@ -36,7 +36,7 @@ func ParserMkdisk(tokens []string) (string, error) {
 	// Unir tokens en una sola cadena y luego dividir por espacios, respetando las comillas
 	args := strings.Join(tokens, " ")
 	// Expresión regular para encontrar los parámetros del comando mkdisk
-	re := regexp.MustCompile(`-size=\d+|-unit=[kKmM]|-fit=[bBfFwW]{2}|-path="[^"]+"|-path=[^\s]+`)
+	re := regexp.MustCompile(`(?i)-size=\d+|-unit=[kKmM]|-fit=[bBfFwW]{2}|-path="[^"]+"|-path=[^\s]+`)
 	// Encuentra todas las coincidencias de la expresión regular en la cadena de argumentos
 	matches := re.FindAllString(args, -1)
 
@@ -65,7 +65,7 @@ func ParserMkdisk(tokens []string) (string, error) {
 			cmd.size = size
 		case "-unit":
 			// Verifica que la unidad sea "K" o "M"
-			if value != "K" && value != "M" {
+			if value != "K" && value != "M" && value != "m" && value != "k" {
 				return "", errors.New("la unidad debe ser K o M")
 			}
 			cmd.unit = strings.ToUpper(value)
@@ -119,7 +119,7 @@ func ParserMkdisk(tokens []string) (string, error) {
 	}
 
 	// Construye un mensaje detallado con las especificaciones del comando ejecutado
-	result := fmt.Sprintf("Comando mkdisk ejecutado con éxito.\nDetalles:\n- Tamaño: %d bytes\n- Ajuste: %s\n- Ruta: %s",
+	result := fmt.Sprintf("Comando mkdisk ejecutado con éxito. -Tamaño: %d bytes- Ajuste: %s- Ruta: %s",
 		sizeBytes, cmd.fit, cmd.path)
 
 	return result, nil // Devuelve el mensaje detallado
