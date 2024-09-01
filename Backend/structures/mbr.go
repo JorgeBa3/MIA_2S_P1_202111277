@@ -4,6 +4,7 @@ import (
 	"bytes"           // Paquete para manipulación de buffers
 	"encoding/binary" // Paquete para codificación y decodificación de datos binarios
 	"encoding/json"
+	"errors"
 	"fmt" // Paquete para formateo de E/S
 	"os"  // Paquete para funciones del sistema operativo
 	"strings"
@@ -103,6 +104,21 @@ func (mbr *MBR) GetFirstAvailablePartition() (*PARTITION, int, int) {
 		}
 	}
 	return nil, -1, -1
+}
+
+// Función para obtener una partición por ID
+func (mbr *MBR) GetPartitionByID(id string) (*PARTITION, error) {
+	for i := 0; i < len(mbr.Mbr_partitions); i++ {
+		// Convertir Part_name a string y eliminar los caracteres nulos
+		partitionID := strings.Trim(string(mbr.Mbr_partitions[i].Part_id[:]), "\x00 ")
+		// Convertir el id a string y eliminar los caracteres nulos
+		inputID := strings.Trim(id, "\x00 ")
+		// Si el nombre de la partición coincide, devolver la partición
+		if strings.EqualFold(partitionID, inputID) {
+			return &mbr.Mbr_partitions[i], nil
+		}
+	}
+	return nil, errors.New("partición no encontrada")
 }
 
 // Método para obtener una partición por nombre

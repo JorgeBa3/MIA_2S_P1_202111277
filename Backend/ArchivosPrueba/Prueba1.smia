@@ -1,2 +1,5 @@
 #Hola mundo
-mkdisk -Size=3000 -unit=K -path=/home/ba3/Escritorio/Archivos-P1/MIA_2S_P1_202111277/Backend/ArchivosPrueba/Disco1.mia
+mkdisk -size=3000 -unit=K -path=/home/ba3/Escritorio/Archivos-P1/MIA_2S_P1_202111277/Backend/discos/Disco1.mia
+fdisk -size=300 -path=/home/ba3/Escritorio/Archivos-P1/MIA_2S_P1_202111277/Backend/discos/Disco1.mia -name=Particion1
+mount -path=/home/ba3/Escritorio/Archivos-P1/MIA_2S_P1_202111277/Backend/discos/Disco1.mia -name=Particion1 
+rmdisk -path=/home/ba3/Escritorio/Archivos-P1/MIA_2S_P1_202111277/Backend/discos/Disco1.mia

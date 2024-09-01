@@ -33,12 +33,26 @@ func Analyzer(input string) (interface{}, error) {
 				if err != nil {
 					results = append(results, fmt.Sprintf("Error en el comando mkdisk: %s", err))
 				} else {
-					results = append(results, result)
+					results = append(results, fmt.Sprintf("%v", result))
 				}
 			case "rmdisk":
 				result, err := commands.ParserRmdisk(tokens[1:])
 				if err != nil {
 					results = append(results, fmt.Sprintf("Error en el comando rmdisk: %s", err))
+				} else {
+					results = append(results, result)
+				}
+			case "fdisk":
+				result, err := commands.ParserFdisk(tokens[1:])
+				if err != nil {
+					results = append(results, fmt.Sprintf("Error en el comando fdisk: %s", err))
+				} else {
+					results = append(results, result)
+				}
+			case "mount":
+				result, err := commands.ParserMount(tokens[1:])
+				if err != nil {
+					results = append(results, fmt.Sprintf("Error en el comando mount: %s", err))
 				} else {
 					results = append(results, result)
 				}

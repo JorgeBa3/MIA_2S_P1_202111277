@@ -27,9 +27,9 @@ type FDISK struct {
 */
 
 // CommandFdisk parsea el comando fdisk y devuelve una instancia de FDISK
-func ParserFdisk(tokens []string) (*FDISK, error) {
+func ParserFdisk(tokens []string) (string, error) {
 	cmd := &FDISK{} // Crea una nueva instancia de FDISK
-
+	var result string
 	// Unir tokens en una sola cadena y luego dividir por espacios, respetando las comillas
 	args := strings.Join(tokens, " ")
 	// Expresión regular para encontrar los parámetros del comando fdisk
@@ -42,7 +42,7 @@ func ParserFdisk(tokens []string) (*FDISK, error) {
 		// Divide cada parte en clave y valor usando "=" como delimitador
 		kv := strings.SplitN(match, "=", 2)
 		if len(kv) != 2 {
-			return nil, fmt.Errorf("formato de parámetro inválido: %s", match)
+			return "", fmt.Errorf("formato de parámetro inválido: %s", match)
 		}
 		key, value := strings.ToLower(kv[0]), kv[1]
 
@@ -57,56 +57,56 @@ func ParserFdisk(tokens []string) (*FDISK, error) {
 			// Convierte el valor del tamaño a un entero
 			size, err := strconv.Atoi(value)
 			if err != nil || size <= 0 {
-				return nil, errors.New("el tamaño debe ser un número entero positivo")
+				return "", errors.New("el tamaño debe ser un número entero positivo")
 			}
 			cmd.size = size
 		case "-unit":
 			// Verifica que la unidad sea "K" o "M"
 			if value != "K" && value != "M" {
-				return nil, errors.New("la unidad debe ser K o M")
+				return "", errors.New("la unidad debe ser K o M")
 			}
 			cmd.unit = strings.ToUpper(value)
 		case "-fit":
 			// Verifica que el ajuste sea "BF", "FF" o "WF"
 			value = strings.ToUpper(value)
 			if value != "BF" && value != "FF" && value != "WF" {
-				return nil, errors.New("el ajuste debe ser BF, FF o WF")
+				return "", errors.New("el ajuste debe ser BF, FF o WF")
 			}
 			cmd.fit = value
 		case "-path":
 			// Verifica que el path no esté vacío
 			if value == "" {
-				return nil, errors.New("el path no puede estar vacío")
+				return "", errors.New("el path no puede estar vacío")
 			}
 			cmd.path = value
 		case "-type":
 			// Verifica que el tipo sea "P", "E" o "L"
 			value = strings.ToUpper(value)
 			if value != "P" && value != "E" && value != "L" {
-				return nil, errors.New("el tipo debe ser P, E o L")
+				return "", errors.New("el tipo debe ser P, E o L")
 			}
 			cmd.typ = value
 		case "-name":
 			// Verifica que el nombre no esté vacío
 			if value == "" {
-				return nil, errors.New("el nombre no puede estar vacío")
+				return "", errors.New("el nombre no puede estar vacío")
 			}
 			cmd.name = value
 		default:
 			// Si el parámetro no es reconocido, devuelve un error
-			return nil, fmt.Errorf("parámetro desconocido: %s", key)
+			return "", fmt.Errorf("parámetro desconocido: %s", key)
 		}
 	}
 
 	// Verifica que los parámetros -size, -path y -name hayan sido proporcionados
 	if cmd.size == 0 {
-		return nil, errors.New("faltan parámetros requeridos: -size")
+		return "", errors.New("faltan parámetros requeridos: -size")
 	}
 	if cmd.path == "" {
-		return nil, errors.New("faltan parámetros requeridos: -path")
+		return "", errors.New("faltan parámetros requeridos: -path")
 	}
 	if cmd.name == "" {
-		return nil, errors.New("faltan parámetros requeridos: -name")
+		return "", errors.New("faltan parámetros requeridos: -name")
 	}
 
 	// Si no se proporcionó la unidad, se establece por defecto a "M"
@@ -129,8 +129,10 @@ func ParserFdisk(tokens []string) (*FDISK, error) {
 	if err != nil {
 		fmt.Println("Error:", err)
 	}
+	// Construye un mensaje detallado con las especificaciones del comando ejecutado
+	result = fmt.Sprintf("Comando fdisk ejecutado con éxito.- Tamaño: %d, Unidad: %s, Ajuste: %s, Ruta: %s, Tipo: %s, Nombre: %s", cmd.size, cmd.unit, cmd.fit, cmd.path, cmd.typ, cmd.name)
 
-	return cmd, nil // Devuelve el comando FDISK creado
+	return result, nil // Devuelve el mensaje detallado
 }
 
 func commandFdisk(fdisk *FDISK) error {
@@ -174,26 +176,13 @@ func createPrimaryPartition(fdisk *FDISK, sizeBytes int) error {
 		fmt.Println("No hay particiones disponibles.")
 	}
 
-	/* SOLO PARA VERIFICACIÓN */
-	// Print para verificar que la partición esté disponible
-	fmt.Println("\nPartición disponible:")
-	availablePartition.Print()
-
 	// Crear la partición con los parámetros proporcionados
 	availablePartition.CreatePartition(startPartition, sizeBytes, fdisk.typ, fdisk.fit, fdisk.name)
-
-	// Print para verificar que la partición se haya creado correctamente
-	fmt.Println("\nPartición creada (modificada):")
-	availablePartition.Print()
 
 	// Colocar la partición en el MBR
 	if availablePartition != nil {
 		mbr.Mbr_partitions[indexPartition] = *availablePartition
 	}
-
-	// Imprimir las particiones del MBR
-	fmt.Println("\nParticiones del MBR:")
-	mbr.PrintPartitions()
 
 	// Serializar el MBR en el archivo binario
 	err = mbr.Serialize(fdisk.path)

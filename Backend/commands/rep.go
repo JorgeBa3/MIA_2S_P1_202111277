@@ -87,7 +87,7 @@ func commandRep(cmd *REP) error {
 
 	// Imprimir partidas montadas
 	fmt.Println("\nParticiones montadas:")
-	for id, path := range utils.GlobalMounts {
+	for id, path := range utils.MountedPartitions {
 		fmt.Printf("ID: %s, PATH: %s\n", id, path)
 	}
 

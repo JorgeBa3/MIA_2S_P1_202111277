@@ -17,8 +17,6 @@ func ConvertToBytes(size int, unit string) (int, error) {
 	}
 }
 
-// Carnet de estudiante
-const Carnet string = "53" // 202113553
 // Lista con todo el abecedario
 var alphabet = []string{
 	"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
