@@ -35,8 +35,8 @@ h1 {
 
 /* Estilo para los textareas */
 textarea {
-  width: 600px; /* Más ancho */
-  height: 150px;
+  width: 1200px; /* Más ancho */
+  height: 300px;
   margin-bottom: 20px;
   padding: 10px;
   border: 1px solid #ccc;

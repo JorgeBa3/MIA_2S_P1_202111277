@@ -32,7 +32,7 @@ func ParserMount(tokens []string) (string, error) {
 	// Unir tokens en una sola cadena y luego dividir por espacios, respetando las comillas
 	args := strings.Join(tokens, " ")
 	// Expresión regular para encontrar los parámetros del comando mount
-	re := regexp.MustCompile(`-path="[^"]+"|-path=[^\s]+|-name="[^"]+"|-name=[^\s]+`)
+	re := regexp.MustCompile(`(?i)-path="[^"]+"|-path=[^\s]+|-name="[^"]+"|-name=[^\s]+`)
 	// Encuentra todas las coincidencias de la expresión regular en la cadena de argumentos
 	matches := re.FindAllString(args, -1)
 
@@ -82,9 +82,18 @@ func ParserMount(tokens []string) (string, error) {
 	err := commandMount(cmd)
 	if err != nil {
 		fmt.Println("Error:", err)
+		return "", err
 	}
-	result := fmt.Sprintf("Partición %s montada correctamente", cmd.name)
-	return result, nil // Devuelve el comando MOUNT creado
+
+	// Generar el ID de partición para el resultado final
+	idPartition, err := GenerateIdPartition(cmd, 0) // En lugar de 0, debes pasar el índice real de la partición montada si lo tienes disponible
+	if err != nil {
+		return "", err
+	}
+
+	// Devuelve el nombre de la partición junto con su ID
+	result := fmt.Sprintf("Partición: %s montada correctamente, con ID: %s", cmd.name, idPartition)
+	return result, nil
 }
 
 func commandMount(mount *MOUNT) error {
@@ -143,4 +152,24 @@ func GenerateIdPartition(mount *MOUNT, indexPartition int) (string, error) {
 	idPartition := fmt.Sprintf("%s%d%s", global.Carnet, indexPartition+1, letter)
 
 	return idPartition, nil
+}
+
+// CommandListMounts devuelve una lista de las particiones montadas
+func CommandListMounts() string {
+	// Verifica si hay particiones montadas
+	if len(utils.MountedPartitions) == 0 {
+		return "No hay particiones montadas."
+	}
+
+	// Variable para construir el resultado
+	var result strings.Builder
+	result.WriteString("Particiones montadas:\n")
+
+	// Recorre el mapa de particiones montadas
+	for id, path := range utils.MountedPartitions {
+		result.WriteString(fmt.Sprintf("ID: %s, Ruta: %s\n", id, path))
+	}
+
+	// Devuelve el resultado como una cadena
+	return result.String()
 }

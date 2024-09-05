@@ -21,7 +21,7 @@ func ParserRep(tokens []string) (*REP, error) {
 	// Unir tokens en una sola cadena y luego dividir por espacios, respetando las comillas
 	args := strings.Join(tokens, " ")
 	// Expresión regular para encontrar los parámetros del comando fdisk
-	re := regexp.MustCompile(`-size=\d+|-unit=[kKmM]|-fit=[bBfF]{2}|-path="[^"]+"|-path=[^\s]+|-type=[pPeElL]|-name="[^"]+"|-name=[^\s]+`)
+	re := regexp.MustCompile(`(?i)-size=\d+|-unit=[kKmM]|-fit=[bBfF]{2}|-path="[^"]+"|-path=[^\s]+|-type=[pPeElL]|-name="[^"]+"|-name=[^\s]+`)
 	// Encuentra todas las coincidencias de la expresión regular en la cadena de argumentos
 	matches := re.FindAllString(args, -1)
 

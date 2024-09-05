@@ -3,7 +3,7 @@ package analyzer
 import (
 	"errors"
 	"fmt"
-	"main/commands" // Asegúrate de importar el paquete commands
+	"main/commands"
 	"strings"
 )
 
@@ -14,19 +14,19 @@ func Analyzer(input string) (interface{}, error) {
 
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
-		if len(line) == 0 {
+		if len(line) == 0 || strings.HasPrefix(line, "#") {
+			// Ignora líneas vacías o comentarios
 			continue
 		}
 
+		tokens := strings.Fields(line)
+		if len(tokens) == 0 {
+			continue
+		}
 		if strings.HasPrefix(line, "#") {
 			// Es un comentario, agrega la línea tal cual
 			results = append(results, line)
 		} else {
-			tokens := strings.Fields(line)
-			if len(tokens) == 0 {
-				continue
-			}
-
 			switch tokens[0] {
 			case "mkdisk":
 				result, err := commands.ParserMkdisk(tokens[1:])
@@ -55,17 +55,24 @@ func Analyzer(input string) (interface{}, error) {
 					results = append(results, fmt.Sprintf("Error en el comando mount: %s", err))
 				} else {
 					results = append(results, result)
+
+				}
+			case "mkfs":
+				// Llama a la función CommandMkfs del paquete commands con los argumentos restantes
+				result, err := commands.ParserMkfs(tokens[1:])
+				if err != nil {
+					results = append(results, fmt.Sprintf("Error en el comando mount: %s", err))
+				} else {
+					results = append(results, result)
 				}
 			default:
 				results = append(results, fmt.Sprintf("Comando desconocido: %s", tokens[0]))
 			}
-
 		}
 	}
-
 	if len(results) == 0 {
-		return nil, errors.New("no se proporcionó ningún comando o comentario")
+		return nil, errors.New("no se proporcionó ningún comando")
 	}
-
+	results = append(results, (commands.CommandListMounts()))
 	return results, nil
 }
