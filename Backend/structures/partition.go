@@ -68,3 +68,13 @@ func (p *PARTITION) Print() {
 	fmt.Printf("Part_correlative: %d\n", p.Part_correlative)
 	fmt.Printf("Part_id: %s\n", string(p.Part_id[:]))
 }
+
+func BuscarParticiones(mbr *MBR) []int {
+	var libres []int
+	for i, p := range mbr.Mbr_partitions {
+		if p.Part_status[0] == '9' {
+			libres = append(libres, i)
+		}
+	}
+	return libres
+}

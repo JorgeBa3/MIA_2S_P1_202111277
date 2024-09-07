@@ -1,9 +1,14 @@
 package commands
 
 import (
+	"bytes"
+	"encoding/binary"
 	structures "main/structures"
 	global "main/utils"
 	utils "main/utils"
+	"os"
+	"strconv"
+	"unsafe"
 
 	"errors" // Paquete para manejar errores y crear nuevos errores con mensajes personalizados
 	"fmt"    // Paquete para formatear cadenas y realizar operaciones de entrada/salida
@@ -172,4 +177,58 @@ func CommandListMounts() string {
 
 	// Devuelve el resultado como una cadena
 	return result.String()
+}
+func GetMountCommand(comando string, id string, p *string) structures.PARTITION {
+	if !(id[0] == '7' && id[1] == '9') {
+		Error(comando, "El primer identificador no es válido.")
+		return structures.PARTITION{}
+	}
+	letra := id[len(id)-1]
+	id = strings.ReplaceAll(id, "79", "")
+	i, _ := strconv.Atoi(string(id[0] - 1))
+	if i < 0 {
+		Error(comando, "El primer identificador no es válido.")
+		return structures.PARTITION{}
+	}
+	for j := 0; j < 26; j++ {
+		if DiscMont[i].Particiones[j].Estado == 1 {
+			if DiscMont[i].Particiones[j].Letra == letra {
+
+				path := ""
+				for k := 0; k < len(DiscMont[i].Path); k++ {
+					if DiscMont[i].Path[k] != 0 {
+						path += string(DiscMont[i].Path[k])
+					}
+				}
+
+				file, error := os.Open(strings.ReplaceAll(path, "\"", ""))
+				if error != nil {
+					Error(comando, "No se ha encontrado el disco")
+					return structures.PARTITION{}
+				}
+				disk := structures.MBR{}
+				file.Seek(0, 0)
+
+				data := leerBytes(file, int(unsafe.Sizeof(structures.MBR{})))
+				buffer := bytes.NewBuffer(data)
+				err_ := binary.Read(buffer, binary.BigEndian, &disk)
+
+				if err_ != nil {
+					Error("FDSIK", "Error al leer el archivo")
+					return structures.PARTITION{}
+				}
+				file.Close()
+
+				nombreParticion := ""
+				for k := 0; k < len(DiscMont[i].Particiones[j].Nombre); k++ {
+					if DiscMont[i].Particiones[j].Nombre[k] != 0 {
+						nombreParticion += string(DiscMont[i].Particiones[j].Nombre[k])
+					}
+				}
+				*p = path
+				return *BuscarParticiones(disk, nombreParticion, path)
+			}
+		}
+	}
+	return structures.PARTITION{}
 }

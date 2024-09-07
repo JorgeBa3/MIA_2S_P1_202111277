@@ -1,8 +1,15 @@
 package utils
 
 import (
+	"bytes"
+	"encoding/binary"
 	"errors"
 	"fmt"
+	"log"
+	structures "main/structures"
+	"os"
+	"strings"
+	"unsafe"
 )
 
 // ConvertToBytes convierte un tamaño y una unidad a bytes
@@ -43,4 +50,82 @@ func GetLetter(path string) (string, error) {
 	}
 
 	return pathToLetter[path], nil
+}
+
+func Comparar(a string, b string) bool {
+	if strings.ToUpper(a) == strings.ToUpper(b) {
+		return true
+	}
+	return false
+}
+
+func DiscMont(path string) bool {
+	if _, exists := pathToLetter[path]; exists {
+		return true
+	}
+	return false
+}
+
+func Error(op string, mensaje string) {
+	fmt.Println("\tERROR: " + op + "\n\tTIPO: " + mensaje)
+}
+
+func Mensaje(op string, mensaje string) {
+	fmt.Println("COMANDO: " + op + ";\nMENSAJE: " + mensaje)
+}
+
+func Confirmar(mensaje string) bool {
+	fmt.Println(mensaje + " (y/n)")
+	var respuesta string
+	fmt.Scanln(&respuesta)
+	if Comparar(respuesta, "y") {
+		return true
+	}
+	return false
+}
+
+func ArchivoExiste(ruta string) bool {
+	if _, err := os.Stat(ruta); os.IsNotExist(err) {
+		return false
+	}
+	return true
+}
+
+func EscribirBytes(file *os.File, bytes []byte) {
+	_, err := file.Write(bytes)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func leerDisco(path string) *structures.MBR {
+	m := structures.MBR{}
+	file, err := os.Open(strings.ReplaceAll(path, "\"", ""))
+	defer file.Close()
+	if err != nil {
+		Error("FDISK", "Error al abrir el archivo")
+		return nil
+	}
+	file.Seek(0, 0)
+	data := leerBytes(file, int(unsafe.Sizeof(structures.MBR{})))
+	buffer := bytes.NewBuffer(data)
+	err_ := binary.Read(buffer, binary.BigEndian, &m)
+	if err_ != nil {
+		Error("FDSIK", "Error al leer el archivo")
+		return nil
+	}
+	var mDir *structures.MBR = &m
+	return mDir
+}
+
+func leerBytes(file *os.File, number int) []byte {
+	bytes := make([]byte, number) //array de bytes
+
+	_, err := file.Read(bytes) // Leido -> bytes
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return bytes
 }

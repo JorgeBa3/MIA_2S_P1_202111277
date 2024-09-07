@@ -7,8 +7,11 @@ import (
 	"strings"
 )
 
+var logued = false
+
 // Analyzer analiza el comando de entrada y ejecuta la acción correspondiente
 func Analyzer(input string) (interface{}, error) {
+
 	lines := strings.Split(input, "\n")
 	var results []string
 
@@ -64,6 +67,15 @@ func Analyzer(input string) (interface{}, error) {
 					results = append(results, fmt.Sprintf("Error en el comando mount: %s", err))
 				} else {
 					results = append(results, result)
+				}
+			case "login":
+				if logued == true {
+					commands.Error("LOGIN", "Ya hay un usuario en línea.")
+					return nil, errors.New("ya hay un usuario en línea")
+				} else {
+					logued = commands.ValidarDatosLOGIN(tokens[1:])
+					results = append(results, fmt.Sprintf("%s", logued))
+					results = append(results, fmt.Sprintf("Usuario logueado: %t", logued))
 				}
 			default:
 				results = append(results, fmt.Sprintf("Comando desconocido: %s", tokens[0]))
