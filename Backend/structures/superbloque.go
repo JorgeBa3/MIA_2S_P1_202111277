@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"time"
+	"unsafe"
 )
 
 type SuperBlock struct {
@@ -334,4 +335,26 @@ func (sb *SuperBlock) PrintBlocks(path string) error {
 	}
 
 	return nil
+}
+
+func NewSuperBloque() *SuperBlock {
+	return &SuperBlock{
+		S_filesystem_type:   3,
+		S_inodes_count:      1,
+		S_blocks_count:      1,
+		S_free_inodes_count: 0,
+		S_free_blocks_count: 0,
+		S_mtime:             float32(time.Now().Unix()),
+		S_umtime:            float32(time.Now().Unix()),
+		S_mnt_count:         0,
+		S_magic:             0xEF53,
+		S_inode_size:        int32(unsafe.Sizeof(Inode{})),
+		S_block_size:        int32(unsafe.Sizeof(FolderBlock{})),
+		S_first_ino:         int32(unsafe.Sizeof(SuperBlock{})),
+		S_first_blo:         int32(unsafe.Sizeof(SuperBlock{})) + int32(unsafe.Sizeof(Inode{})),
+		S_bm_inode_start:    int32(unsafe.Sizeof(SuperBlock{}) + unsafe.Sizeof(Inode{})),
+		S_bm_block_start:    int32(unsafe.Sizeof(SuperBlock{}) + unsafe.Sizeof(Inode{}) + unsafe.Sizeof(Inode{})),
+		S_inode_start:       int32(unsafe.Sizeof(SuperBlock{}) + unsafe.Sizeof(Inode{}) + unsafe.Sizeof(Inode{}) + unsafe.Sizeof(FolderBlock{})),
+		S_block_start:       int32(unsafe.Sizeof(SuperBlock{}) + unsafe.Sizeof(Inode{}) + unsafe.Sizeof(Inode{}) + unsafe.Sizeof(FolderBlock{}) + unsafe.Sizeof(FolderBlock{})),
+	}
 }

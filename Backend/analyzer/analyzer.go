@@ -69,13 +69,16 @@ func Analyzer(input string) (interface{}, error) {
 					results = append(results, result)
 				}
 			case "login":
-				if logued == true {
+				if logued {
 					commands.Error("LOGIN", "Ya hay un usuario en línea.")
 					return nil, errors.New("ya hay un usuario en línea")
 				} else {
-					logued = commands.ValidarDatosLOGIN(tokens[1:])
-					results = append(results, fmt.Sprintf("%s", logued))
-					results = append(results, fmt.Sprintf("Usuario logueado: %t", logued))
+					results = append(results, "Usuario logueado correctamente")
+					logued, err := commands.ParserLogin(tokens[1:])
+					results = append(results, fmt.Sprintf("Usuario logueado: %s", logued))
+					if err != nil {
+						results = append(results, fmt.Sprintf("Error en el comando login: %s", err))
+					}
 				}
 			default:
 				results = append(results, fmt.Sprintf("Comando desconocido: %s", tokens[0]))

@@ -179,12 +179,12 @@ func CommandListMounts() string {
 	return result.String()
 }
 func GetMountCommand(comando string, id string, p *string) structures.PARTITION {
-	if !(id[0] == '7' && id[1] == '9') {
+	if !(id[0] == '7' && id[1] == '7') {
 		Error(comando, "El primer identificador no es válido.")
 		return structures.PARTITION{}
 	}
 	letra := id[len(id)-1]
-	id = strings.ReplaceAll(id, "79", "")
+	id = strings.ReplaceAll(id, "77", "")
 	i, _ := strconv.Atoi(string(id[0] - 1))
 	if i < 0 {
 		Error(comando, "El primer identificador no es válido.")

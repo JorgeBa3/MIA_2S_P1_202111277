@@ -97,3 +97,17 @@ func (inode *Inode) Print() {
 	fmt.Printf("I_type: %s\n", string(inode.I_type[:]))
 	fmt.Printf("I_perm: %s\n", string(inode.I_perm[:]))
 }
+
+func NewInode() *Inode {
+	return &Inode{
+		I_uid:   1,
+		I_gid:   1,
+		I_s:     0,
+		I_atime: float32(time.Now().Unix()),
+		I_ctime: float32(time.Now().Unix()),
+		I_mtime: float32(time.Now().Unix()),
+		I_block: [15]int32{},
+		I_type:  [1]byte{'0'},
+		I_perm:  [3]byte{'7', '7', '5'},
+	}
+}

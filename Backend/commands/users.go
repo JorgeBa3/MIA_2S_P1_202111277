@@ -3,7 +3,6 @@ package commands
 import (
 	"bytes"
 	"encoding/binary"
-	"errors"
 	"main/structures"
 	"main/utils"
 	"os"
@@ -365,62 +364,4 @@ func rmuser(n string) {
 	Mensaje("RMUSER", "Usuario "+n+", eliminado correctamente!")
 
 	file.Close()
-}
-
-func GetMount(id string) (*structures.PARTITION, error) {
-	// Verifica que el ID sea válido
-	if !(id[0] == '7' && id[1] == '7') {
-		return nil, errors.New("El primer identificador no es válido.")
-	}
-
-	// Extraer la letra de la partición montada
-	letra := id[len(id)-1]
-
-	// Eliminar el prefijo "77" del ID
-	id = strings.ReplaceAll(id, "77", "")
-
-	// Convertir el primer carácter del ID restante a un entero
-	i, _ := strconv.Atoi(string(id[0] - 1))
-	if i < 0 {
-		return nil, errors.New("El primer identificador no es válido.")
-	}
-
-	// Buscar entre las particiones montadas globales
-	for index := 0; index < 26; index++ {
-		if DiscMont[i].Particiones[index].Estado == 1 {
-			if DiscMont[i].Particiones[index].Letra == letra {
-
-				// Obtener el path del disco montado
-				path := string(DiscMont[i].Path[:])
-
-				// Abrir el archivo binario del disco
-				file, err := os.Open(strings.ReplaceAll(path, "\"", ""))
-				if err != nil {
-					return nil, errors.New("No se ha encontrado el disco")
-				}
-				defer file.Close()
-
-				// Leer el MBR del disco
-				var mbr structures.MBR
-				err = mbr.Deserialize(path)
-				if err != nil {
-					return nil, errors.New("Error al leer el MBR del disco")
-				}
-
-				// Obtener el nombre de la partición
-				nombreParticion := string(DiscMont[i].Particiones[index].Nombre[:])
-
-				// Buscar la partición dentro del MBR
-				partition, _ := mbr.GetPartitionByName(nombreParticion)
-				if partition == nil {
-					return nil, errors.New("La partición no existe")
-				}
-
-				// Retornar la partición encontrada
-				return partition, nil
-			}
-		}
-	}
-
-	return nil, errors.New("No se encontró la partición montada")
 }

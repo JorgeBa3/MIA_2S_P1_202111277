@@ -175,3 +175,13 @@ func (mbr *MBR) PrintPartitions() {
 		fmt.Printf("  ID: %s\n", partID)
 	}
 }
+
+func NewMBR() *MBR {
+	return &MBR{
+		Mbr_tamano:         0,
+		Mbr_fecha_creacion: float32(time.Now().Unix()),
+		Mbr_dsk_signature:  0,
+		Dsk_fit:            [1]byte{},
+		Mbr_partitions:     [4]PARTITION{},
+	}
+}

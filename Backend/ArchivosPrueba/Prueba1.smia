@@ -2,4 +2,6 @@
 mkdisk -size=3000 -unit=K -path=/home/ba3/Escritorio/Archivos-P1/MIA_2S_P1_202111277/Backend/discos/Disco1.mia
 fdisk -size=300 -path=/home/ba3/Escritorio/Archivos-P1/MIA_2S_P1_202111277/Backend/discos/Disco1.mia -name=Particion1
 mount -path=/home/ba3/Escritorio/Archivos-P1/MIA_2S_P1_202111277/Backend/discos/Disco1.mia -name=Particion1 
+mkfs -type=full -id=771A
+login -user=root -pass=123 -id=771A
 rmdisk -path=/home/ba3/Escritorio/Archivos-P1/MIA_2S_P1_202111277/Backend/discos/Disco1.mia
