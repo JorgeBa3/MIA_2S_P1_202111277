@@ -7,14 +7,15 @@ import (
 	"strings"
 )
 
-var logued = false
-
 // Analyzer analiza el comando de entrada y ejecuta la acción correspondiente
 func Analyzer(input string) (interface{}, error) {
 
 	lines := strings.Split(input, "\n")
 	var results []string
-
+	var logued = false
+	var LoguedUser string = ""
+	//var loguedPassword string = ""
+	//var loguedId string = ""
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
 		if len(line) == 0 || strings.HasPrefix(line, "#") {
@@ -70,16 +71,23 @@ func Analyzer(input string) (interface{}, error) {
 				}
 			case "login":
 				if logued {
-					commands.Error("LOGIN", "Ya hay un usuario en línea.")
-					return nil, errors.New("ya hay un usuario en línea")
+					commands.Error("LOGIN", "Ya hay un usuario en línea."+LoguedUser)
+					results = append(results, fmt.Sprintf("Sesion no iniciada, usuario ya logueado: %s", LoguedUser))
+					println("LoguedUser: ", LoguedUser)
 				} else {
-					results = append(results, "Usuario logueado correctamente")
-					logued, err := commands.ParserLogin(tokens[1:])
-					results = append(results, fmt.Sprintf("Usuario logueado: %s", logued))
+					// Solo asigna LoguedUser si no hay error
+					parsedUser, err := commands.ParserLogin(tokens[1:])
 					if err != nil {
 						results = append(results, fmt.Sprintf("Error en el comando login: %s", err))
+						println("LoguedUser: ", LoguedUser) // Aquí debería ser el valor anterior
+					} else {
+						logued = true
+						LoguedUser = parsedUser // Solo asigna aquí
+						results = append(results, "Usuario logueado correctamente")
+						results = append(results, fmt.Sprintf("Usuario logueado: %s", LoguedUser))
 					}
 				}
+
 			default:
 				results = append(results, fmt.Sprintf("Comando desconocido: %s", tokens[0]))
 			}
