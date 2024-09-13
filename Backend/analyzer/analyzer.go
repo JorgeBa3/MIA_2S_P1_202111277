@@ -87,6 +87,14 @@ func Analyzer(input string) (interface{}, error) {
 						results = append(results, fmt.Sprintf("Usuario logueado: %s", LoguedUser))
 					}
 				}
+			case "logout":
+				if logued {
+					logued = false
+					LoguedUser = ""
+					results = append(results, "Sesión cerrada correctamente")
+				} else {
+					results = append(results, "No hay una sesión activa")
+				}
 
 			default:
 				results = append(results, fmt.Sprintf("Comando desconocido: %s", tokens[0]))
