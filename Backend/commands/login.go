@@ -2,7 +2,9 @@ package commands
 
 import (
 	"fmt"
+	global "main/utils"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -98,26 +100,49 @@ func ParserLogin(tokens []string) (string, error) {
 	return "", fmt.Errorf("Usuario o contraseña incorrectos.")
 }
 
-func ReadUsersFile(partitionID string) (string, error) {
-	// Obtener la partición montada
-	partitionPath := "" // Aquí deberías obtener el path de la partición montada usando tu función
-
-	// Abre el archivo binario donde está el sistema de archivos
-	file, err := os.Open(partitionPath)
+func GetPartitionPath(partitionID string) string {
+	mounted
+	mountedPartition, partitionPath, err := global.GetMountedPartition(partitionID)
+	if mountedPartition == true {
+		print("la verdad no hace nada, pero igual me pide usarlo :/")
+	}
 	if err != nil {
-		return "", fmt.Errorf("Error al abrir la partición: %v", err)
+		return "Error al obtener id"
+	}
+
+	return partitionPath
+}
+
+func ReadUsersFile(partitionID string) (string, error) {
+	// Obtener el path de la partición montada
+	partitionPath := GetPartitionPath(partitionID) // Debes implementar GetPartitionPath para devolver la ruta correcta
+
+	// Ruta del archivo users.txt dentro de la partición
+	usersFilePath := filepath.Join(partitionPath, "users.txt")
+
+	// Abrir el archivo users.txt
+	file, err := os.Open(usersFilePath)
+	if err != nil {
+		return "", fmt.Errorf("Error al abrir el archivo users.txt: %v", err)
 	}
 	defer file.Close()
 
-	// Aquí debes localizar el archivo users.txt dentro de la partición
-	// Supongo que ya tienes las funciones para leer archivos desde la partición
+	// Leer el contenido del archivo
+	fileInfo, err := file.Stat()
+	if err != nil {
+		return "", fmt.Errorf("Error al obtener la información del archivo: %v", err)
+	}
 
-	// Leer el contenido del archivo users.txt
-	// Este es solo un ejemplo básico, deberías adaptar según tu estructura
-	usersFileData := "" // Asume que tienes el contenido de users.txt como string
+	// Leer el contenido en memoria
+	usersData := make([]byte, fileInfo.Size())
+	_, err = file.Read(usersData)
+	if err != nil {
+		return "", fmt.Errorf("Error al leer el archivo: %v", err)
+	}
 
-	return usersFileData, nil
+	return string(usersData), nil
 }
+
 func ValidarUsuario(usersData string, user string, pass string) bool {
 	// Supongamos que el archivo tiene líneas con el formato: "usuario,contraseña"
 	lines := strings.Split(usersData, "\n")

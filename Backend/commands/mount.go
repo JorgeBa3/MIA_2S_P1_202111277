@@ -178,6 +178,7 @@ func CommandListMounts() string {
 	// Devuelve el resultado como una cadena
 	return result.String()
 }
+
 func GetMountCommand(comando string, id string, p *string) structures.PARTITION {
 	if !(id[0] == '7' && id[1] == '7') {
 		Error(comando, "El primer identificador no es válido.")
